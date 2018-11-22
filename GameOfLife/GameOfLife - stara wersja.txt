@@ -1,0 +1,440 @@
+#include  <SFML\Window.hpp>
+#include "SFML\Graphics.hpp"
+//#include  <SFML\System.hpp>
+
+//using namespace std;
+using namespace sf;
+
+const int height = 66;
+const int width = 122;
+
+class MyRectangleShape
+	:public RectangleShape
+{
+public:
+	bool alive;
+	MyRectangleShape(){}
+};
+
+void boardCreation(MyRectangleShape(**board))
+{
+	for (int i = 0; i < width; i++)
+		for (int j = 0; j < height; j++)
+		{
+			board[i][j].alive = 0;
+			board[i][j].setSize(Vector2f(12, 12)); //wielkosc pola to 100x100
+			board[i][j].setPosition(35 + (float)i * 15, 35 + (float)j * 15); // plansza zaczyna sie od 50 piksela, pola rozstawione co 15 pikseli
+			board[i][j].setOutlineThickness(1);
+			board[i][j].setFillColor(Color(0, 0, 0));
+			board[i][j].setOutlineColor(Color(50, 50, 50));
+		}
+}
+
+int main()
+{
+	MyRectangleShape start;
+	start.alive = 0;
+	start.setSize(Vector2f(50, 50)); //wielkosc pola to 100x100
+	start.setPosition(0,0); // plansza zaczyna sie od 50 piksela, pola rozstawione co 15 pikseli
+	start.setOutlineThickness(1);
+	start.setFillColor(Color(200, 0, 0));
+	start.setOutlineColor(Color(50, 50, 50));
+
+	MyRectangleShape **board = new MyRectangleShape*[width];
+	for (int i = 0; i <  width; ++i)
+		board[i] = new MyRectangleShape[height];
+	MyRectangleShape **newBoard = new MyRectangleShape*[width];
+	for (int i = 0; i < width; ++i)
+		newBoard[i] = new MyRectangleShape[height];
+
+	boardCreation(board);
+	boardCreation(newBoard);
+	int counter = 0;
+	bool gameInit = 1, gameStart = 0, gameStop = 0;
+	Vector2f mousePosition;
+	int x = 0, y = 0;
+
+	sf::RenderWindow window(sf::VideoMode(1920, 1080, 32), "GameOfLife", sf::Style::Fullscreen);	//glowne okno aplikacji
+	window.setPosition(Vector2i(0, 0));
+
+	while (window.isOpen())
+	{
+		sf::Event event;
+		while (window.pollEvent(event))
+		{
+			if (gameInit)
+			{
+				if (Vector2f(Mouse::getPosition(window)).y > 49 && Vector2f(Mouse::getPosition(window)).y < 1025 && Vector2f(Mouse::getPosition(window)).x > 49 && Vector2f(Mouse::getPosition(window)).x < 1865)
+				{
+					board[x][y].setOutlineColor(Color(50, 50, 50));
+					x = (Vector2f(Mouse::getPosition(window)).x - 35) / 15;
+					y = (Vector2f(Mouse::getPosition(window)).y - 35) / 15;
+					board[x][y].setOutlineColor(Color(200, 200, 200));
+					if (Mouse::isButtonPressed(Mouse::Left))
+						if (board[x][y].getFillColor() == Color(0, 0, 0))
+						{
+							board[x][y].setFillColor(Color(255, 255, 255));
+							board[x][y].alive = 1;
+						}
+						else
+						{
+							board[x][y].setFillColor(Color(0, 0, 0));
+							board[x][y].alive = 0;
+						}
+				}
+
+				if (start.getGlobalBounds().contains(Vector2f(Mouse::getPosition(window))))
+				{
+					start.setOutlineColor(Color(200, 200, 200));
+					if (Mouse::isButtonPressed(Mouse::Left))
+					{
+						gameInit = 0;
+						gameStart = 1;
+					}
+				}
+			}
+
+			if (gameStop)
+			{
+
+			}
+
+			if (event.type == sf::Event::Closed)
+				window.close();
+
+			if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape)
+				window.close();
+		}
+
+		if (gameStart)
+		{
+			//for (int i = 0, j = 1; j < height-1; j++)
+			//	if (board[i][j].alive == 1)
+			//	{
+			//		counter = 0;
+			//		if (board[i + 1][j].alive == 1)
+			//			counter++;
+			//		if (board[i + 1][j + 1].alive == 1)
+			//			counter++;
+			//		if (board[i + 1][j - 1].alive == 1)
+			//			counter++;
+			//		if (board[i][j + 1].alive == 1)
+			//			counter++;
+			//		if (board[i][j - 1].alive == 1)
+			//			counter++;
+			//		if (counter == 3 || counter == 2)
+			//		{
+			//			newBoard[i][j].alive = 1;
+			//			newBoard[i][j].setFillColor(Color(255, 255, 255));
+			//			window.draw(newBoard[i][j]);
+			//		}
+			//		else
+			//		{
+			//			newBoard[i][j].alive = 0;
+			//			newBoard[i][j].setFillColor(Color(0, 0, 0));
+			//			window.draw(newBoard[i][j]);
+			//		}
+			//	}
+			//	else
+			//	{
+			//		counter = 0;
+			//		if (board[i + 1][j].alive == 1)
+			//			counter++;
+			//		if (board[i + 1][j + 1].alive == 1)
+			//			counter++;
+			//		if (board[i + 1][j - 1].alive == 1)
+			//			counter++;
+			//		if (board[i][j + 1].alive == 1)
+			//			counter++;
+			//		if (board[i][j - 1].alive == 1)
+			//			counter++;
+			//		if (counter == 3)
+			//		{
+			//			newBoard[i][j].alive = 1;
+			//			newBoard[i][j].setFillColor(Color(255, 255, 255));
+			//			window.draw(newBoard[i][j]);
+			//		}
+			//		else
+			//		{
+			//			newBoard[i][j].alive = 0;
+			//			newBoard[i][j].setFillColor(Color(0, 0, 0));
+			//			window.draw(newBoard[i][j]);
+			//		}
+
+			//	}
+
+			//	for (int i = width-1, j = 1; j < height-1; j++)
+			//		if (board[i][j].alive == 1)
+			//		{
+			//			counter = 0;
+			//			if (board[i - 1][j].alive == 1)
+			//				counter++;
+			//			if (board[i - 1][j + 1].alive == 1)
+			//				counter++;
+			//			if (board[i - 1][j - 1].alive == 1)
+			//				counter++;
+			//			if (board[i][j + 1].alive == 1)
+			//				counter++;
+			//			if (board[i][j - 1].alive == 1)
+			//				counter++;
+			//			if (counter == 3 || counter == 2)
+			//			{
+			//				newBoard[i][j].alive = 1;
+			//				newBoard[i][j].setFillColor(Color(255, 255, 255));
+			//				window.draw(newBoard[i][j]);
+			//			}
+			//			else
+			//			{
+			//				newBoard[i][j].alive = 0;
+			//				newBoard[i][j].setFillColor(Color(0, 0, 0));
+			//				window.draw(newBoard[i][j]);
+			//			}
+			//		}
+			//		else
+			//		{
+			//			counter = 0;
+			//			if (board[i - 1][j].alive == 1)
+			//				counter++;
+			//			if (board[i - 1][j + 1].alive == 1)
+			//				counter++;
+			//			if (board[i - 1][j - 1].alive == 1)
+			//				counter++;
+			//			if (board[i][j + 1].alive == 1)
+			//				counter++;
+			//			if (board[i][j - 1].alive == 1)
+			//				counter++;
+			//			if (counter == 3)
+			//			{
+			//				newBoard[i][j].alive = 1;
+			//				newBoard[i][j].setFillColor(Color(255, 255, 255));
+			//				window.draw(newBoard[i][j]);
+			//			}
+			//			else
+			//			{
+			//				newBoard[i][j].alive = 0;
+			//				newBoard[i][j].setFillColor(Color(0, 0, 0));
+			//				window.draw(newBoard[i][j]);
+			//			}
+
+			//		}
+
+			//		for (int j = 0, i = 1; i < width-1; i++)
+			//			if (board[i][j].alive == 1)
+			//			{
+			//				counter = 0;
+			//				if (board[i + 1][j].alive == 1)
+			//					counter++;
+			//				if (board[i - 1][j].alive == 1)
+			//					counter++;
+			//				if (board[i + 1][j + 1].alive == 1)
+			//					counter++;
+			//				if (board[i - 1][j + 1].alive == 1)
+			//					counter++;
+			//				if (board[i][j + 1].alive == 1)
+			//					counter++;
+			//				if (counter == 3 || counter == 2)
+			//				{
+			//					newBoard[i][j].alive = 1;
+			//					newBoard[i][j].setFillColor(Color(255, 255, 255));
+			//					window.draw(newBoard[i][j]);
+			//				}
+			//				else
+			//				{
+			//					newBoard[i][j].alive = 0;
+			//					newBoard[i][j].setFillColor(Color(0, 0, 0));
+			//					window.draw(newBoard[i][j]);
+			//				}
+			//			}
+			//			else
+			//			{
+			//				counter = 0;
+			//				if (board[i + 1][j].alive == 1)
+			//					counter++;
+			//				if (board[i - 1][j].alive == 1)
+			//					counter++;
+			//				if (board[i + 1][j + 1].alive == 1)
+			//					counter++;
+			//				if (board[i - 1][j + 1].alive == 1)
+			//					counter++;
+			//				if (board[i][j + 1].alive == 1)
+			//					counter++;
+			//				if (counter == 3)
+			//				{
+			//					newBoard[i][j].alive = 1;
+			//					newBoard[i][j].setFillColor(Color(255, 255, 255));
+			//					window.draw(newBoard[i][j]);
+			//				}
+			//				else
+			//				{
+			//					newBoard[i][j].alive = 0;
+			//					newBoard[i][j].setFillColor(Color(0, 0, 0));
+			//					window.draw(newBoard[i][j]);
+			//				}
+
+			//			}
+
+			//			for (int i = 1, j = height-1; i < width-1; i++)
+			//				if (board[i][j].alive == 1)
+			//				{
+			//					counter = 0;
+			//					if (board[i + 1][j].alive == 1)
+			//						counter++;
+			//					if (board[i - 1][j].alive == 1)
+			//						counter++;
+			//					if (board[i + 1][j - 1].alive == 1)
+			//						counter++;
+			//					if (board[i - 1][j - 1].alive == 1)
+			//						counter++;
+			//					if (board[i][j - 1].alive == 1)
+			//						counter++;
+			//					if (counter == 3 || counter == 2)
+			//					{
+			//						newBoard[i][j].alive = 1;
+			//						newBoard[i][j].setFillColor(Color(255, 255, 255));
+			//						window.draw(newBoard[i][j]);
+			//					}
+			//					else
+			//					{
+			//						newBoard[i][j].alive = 0;
+			//						newBoard[i][j].setFillColor(Color(0, 0, 0));
+			//						window.draw(newBoard[i][j]);
+			//					}
+			//				}
+			//				else
+			//				{
+			//					counter = 0;
+			//					if (board[i + 1][j].alive == 1)
+			//						counter++;
+			//					if (board[i - 1][j].alive == 1)
+			//						counter++;
+			//					if (board[i + 1][j - 1].alive == 1)
+			//						counter++;
+			//					if (board[i - 1][j - 1].alive == 1)
+			//						counter++;
+			//					if (board[i][j - 1].alive == 1)
+			//						counter++;
+			//					if (counter == 3)
+			//					{
+			//						newBoard[i][j].alive = 1;
+			//						newBoard[i][j].setFillColor(Color(255, 255, 255));
+			//						window.draw(newBoard[i][j]);
+			//					}
+			//					else
+			//					{
+			//						newBoard[i][j].alive = 0;
+			//						newBoard[i][j].setFillColor(Color(0, 0, 0));
+			//						window.draw(newBoard[i][j]);
+			//					}
+
+			//				}
+
+
+			for (int i = 1; i < width - 1; i++)
+			{
+				//sleep(milliseconds(1));
+				for (int j = 1; j < height - 1; j++)
+				{
+					if (board[i][j].alive == 1)
+					{
+						counter = 0;
+						if (board[i + 1][j].alive == 1)
+							counter++;
+						if (board[i - 1][j].alive == 1)
+							counter++;
+						if (board[i + 1][j + 1].alive == 1)
+							counter++;
+						if (board[i + 1][j - 1].alive == 1)
+							counter++;
+						if (board[i - 1][j + 1].alive == 1)
+							counter++;
+						if (board[i - 1][j - 1].alive == 1)
+							counter++;
+						if (board[i][j + 1].alive == 1)
+							counter++;
+						if (board[i][j - 1].alive == 1)
+							counter++;
+						if (counter == 3 || counter == 2)
+						{
+							newBoard[i][j].alive = 1;
+							newBoard[i][j].setFillColor(Color(255, 255, 255));
+							window.draw(newBoard[i][j]);
+						}
+						else
+						{
+							newBoard[i][j].alive = 0;
+							newBoard[i][j].setFillColor(Color(0, 0, 0));
+							window.draw(newBoard[i][j]);
+						}
+					}
+					else
+					{
+						counter = 0;
+						if (board[i + 1][j].alive == 1)
+							counter++;
+						if (board[i - 1][j].alive == 1)
+							counter++;
+						if (board[i + 1][j + 1].alive == 1)
+							counter++;
+						if (board[i + 1][j - 1].alive == 1)
+							counter++;
+						if (board[i - 1][j + 1].alive == 1)
+							counter++;
+						if (board[i - 1][j - 1].alive == 1)
+							counter++;
+						if (board[i][j + 1].alive == 1)
+							counter++;
+						if (board[i][j - 1].alive == 1)
+							counter++;
+						if (counter == 3)
+						{
+							newBoard[i][j].alive = 1;
+							newBoard[i][j].setFillColor(Color(255, 255, 255));
+							window.draw(newBoard[i][j]);
+						}
+						else
+						{
+							newBoard[i][j].alive = 0;
+							newBoard[i][j].setFillColor(Color(0, 0, 0));
+							window.draw(newBoard[i][j]);
+						}
+
+					}
+				}
+			}
+
+			for (int i = 1; i < width-1; i++)
+				for (int j = 1; j < height-1; j++)
+					board[i][j] = newBoard[i][j];
+		}
+
+		for (int i = 1; i < width-1; i++)
+			for (int j = 1; j < height-1; j++)
+				window.draw(board[i][j]);
+		window.draw(start);
+		window.display();
+	}
+
+	//board[100][50].alive = 1;
+	//board[101][50].alive = 1;
+	//board[102][50].alive = 1;
+	//board[101][48].alive = 1;
+	//board[96][49].alive = 1;
+	//board[95][49].alive = 1;
+	//board[96][50].alive = 1;
+	//board[100][50].setFillColor(Color(255, 255, 255));
+	//board[100][51].setFillColor(Color(255, 255, 255));
+	//board[100][52].setFillColor(Color(255, 255, 255));
+	//board[101][48].setFillColor(Color(255, 255, 255));
+	//board[96][49].setFillColor(Color(255, 255, 255));
+	//board[95][49].setFillColor(Color(255, 255, 255));
+	//board[96][50].setFillColor(Color(255, 255, 255));
+	//window.draw(board[100][50]);
+	//window.draw(board[100][51]);
+	//window.draw(board[100][52]);
+	//window.draw(board[101][48]);
+	//window.draw(board[96][49]);
+	//window.draw(board[95][49]);
+	//window.draw(board[96][50]);
+	//window.display();
+	return false;
+}
