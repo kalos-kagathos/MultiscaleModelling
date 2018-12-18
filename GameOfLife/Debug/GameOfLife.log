@@ -1,48 +1,48 @@
 ﻿  Main.cpp
-c:\users\michal\documents\visual studio 2017\projects\gameoflife — kopia\gameoflife\main.cpp(187): warning C4018: '<': signed/unsigned mismatch
-c:\users\michal\documents\visual studio 2017\projects\gameoflife — kopia\gameoflife\main.cpp(188): warning C4018: '<': signed/unsigned mismatch
-c:\users\michal\documents\visual studio 2017\projects\gameoflife — kopia\gameoflife\main.cpp(193): warning C4018: '<': signed/unsigned mismatch
-c:\users\michal\documents\visual studio 2017\projects\gameoflife — kopia\gameoflife\main.cpp(339): warning C4554: '|': check operator precedence for possible error; use parentheses to clarify precedence
-c:\users\michal\documents\visual studio 2017\projects\gameoflife — kopia\gameoflife\main.cpp(343): warning C4018: '<': signed/unsigned mismatch
-c:\users\michal\documents\visual studio 2017\projects\gameoflife — kopia\gameoflife\main.cpp(344): warning C4018: '<': signed/unsigned mismatch
-c:\users\michal\documents\visual studio 2017\projects\gameoflife — kopia\gameoflife\main.cpp(349): warning C4018: '<': signed/unsigned mismatch
-c:\users\michal\documents\visual studio 2017\projects\gameoflife — kopia\gameoflife\main.cpp(875): warning C4244: 'argument': conversion from 'int' to 'T', possible loss of data
+c:\users\michal\documents\visual studio 2017\projects\gameoflife — kopia\gameoflife\main.cpp(229): warning C4018: '<': signed/unsigned mismatch
+c:\users\michal\documents\visual studio 2017\projects\gameoflife — kopia\gameoflife\main.cpp(230): warning C4018: '<': signed/unsigned mismatch
+c:\users\michal\documents\visual studio 2017\projects\gameoflife — kopia\gameoflife\main.cpp(235): warning C4018: '<': signed/unsigned mismatch
+c:\users\michal\documents\visual studio 2017\projects\gameoflife — kopia\gameoflife\main.cpp(381): warning C4554: '|': check operator precedence for possible error; use parentheses to clarify precedence
+c:\users\michal\documents\visual studio 2017\projects\gameoflife — kopia\gameoflife\main.cpp(385): warning C4018: '<': signed/unsigned mismatch
+c:\users\michal\documents\visual studio 2017\projects\gameoflife — kopia\gameoflife\main.cpp(386): warning C4018: '<': signed/unsigned mismatch
+c:\users\michal\documents\visual studio 2017\projects\gameoflife — kopia\gameoflife\main.cpp(391): warning C4018: '<': signed/unsigned mismatch
+c:\users\michal\documents\visual studio 2017\projects\gameoflife — kopia\gameoflife\main.cpp(917): warning C4244: 'argument': conversion from 'int' to 'T', possible loss of data
           with
           [
               T=float
           ]
-c:\users\michal\documents\visual studio 2017\projects\gameoflife — kopia\gameoflife\main.cpp(988): warning C4101: 'i': unreferenced local variable
-c:\users\michal\documents\visual studio 2017\projects\gameoflife — kopia\gameoflife\main.cpp(1183): warning C4018: '<': signed/unsigned mismatch
-c:\users\michal\documents\visual studio 2017\projects\gameoflife — kopia\gameoflife\main.cpp(1226): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
-c:\users\michal\documents\visual studio 2017\projects\gameoflife — kopia\gameoflife\main.cpp(1473): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
+c:\users\michal\documents\visual studio 2017\projects\gameoflife — kopia\gameoflife\main.cpp(1030): warning C4101: 'i': unreferenced local variable
+c:\users\michal\documents\visual studio 2017\projects\gameoflife — kopia\gameoflife\main.cpp(1225): warning C4018: '<': signed/unsigned mismatch
+c:\users\michal\documents\visual studio 2017\projects\gameoflife — kopia\gameoflife\main.cpp(1284): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+c:\users\michal\documents\visual studio 2017\projects\gameoflife — kopia\gameoflife\main.cpp(1589): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
           with
           [
               T=float
           ]
-c:\users\michal\documents\visual studio 2017\projects\gameoflife — kopia\gameoflife\main.cpp(1474): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
+c:\users\michal\documents\visual studio 2017\projects\gameoflife — kopia\gameoflife\main.cpp(1590): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
           with
           [
               T=float
           ]
-c:\users\michal\documents\visual studio 2017\projects\gameoflife — kopia\gameoflife\main.cpp(1493): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
+c:\users\michal\documents\visual studio 2017\projects\gameoflife — kopia\gameoflife\main.cpp(1609): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
           with
           [
               T=float
           ]
-c:\users\michal\documents\visual studio 2017\projects\gameoflife — kopia\gameoflife\main.cpp(1494): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
+c:\users\michal\documents\visual studio 2017\projects\gameoflife — kopia\gameoflife\main.cpp(1610): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
           with
           [
               T=float
           ]
-c:\users\michal\documents\visual studio 2017\projects\gameoflife — kopia\gameoflife\main.cpp(2015): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
+c:\users\michal\documents\visual studio 2017\projects\gameoflife — kopia\gameoflife\main.cpp(2445): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
           with
           [
               T=float
           ]
-c:\users\michal\documents\visual studio 2017\projects\gameoflife — kopia\gameoflife\main.cpp(2016): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
+c:\users\michal\documents\visual studio 2017\projects\gameoflife — kopia\gameoflife\main.cpp(2446): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
           with
           [
               T=float
           ]
-c:\users\michal\documents\visual studio 2017\projects\gameoflife — kopia\gameoflife\main.cpp(2022): warning C4018: '<': signed/unsigned mismatch
+c:\users\michal\documents\visual studio 2017\projects\gameoflife — kopia\gameoflife\main.cpp(2452): warning C4018: '<': signed/unsigned mismatch
   GameOfLife.vcxproj -> C:\Users\Michal\Documents\Visual Studio 2017\Projects\GameOfLife — kopia\Debug\GameOfLife.exe

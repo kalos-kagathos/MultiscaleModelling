@@ -17,8 +17,8 @@ const int boardCoordinate_y = 35;
 const int screenWidth = 1920;
 const int screenHeight = 1080;
 
-int height = 207;
-int width = 321;
+int height = 100;
+int width = 200;
 int numberOfGrains = 2;
 int inclusionsNumber = 10;
 int inclusionsSize = 5;
@@ -28,6 +28,10 @@ int cellSize = 10;
 vector<int> choosen;
 char probablityOfRule4 = 50;
 int boundarySize = 1;
+
+double energyMAX = 2;
+double energyMIN = 6;
+int SRXnumberOfGrains = 3;
 
 const double A = 86710969050178.5;
 const double B = 9.41268203527779;
@@ -43,12 +47,51 @@ unsigned int numberOfRegeneratedGrains = 100000000;
 const int menuCoordinateX = 10;
 const int menuCoordinateY = 10;
 
+class Node {
+public:
+	Node *next;
+	int x;
+	int y;
+};
+class LinkedList
+{
+public:
+	int length;
+	Node* head;
+	Node* tail;
+
+	LinkedList();
+	~LinkedList();
+	void add(int x, int y);
+};
+LinkedList::LinkedList() {
+	this->length = 0;
+	this->head = new Node();
+	this->tail = new Node();
+	Node* firstNode = new Node();
+	firstNode->next = NULL;
+	this->head->next = firstNode;
+	this->tail->next = firstNode;
+}
+LinkedList::~LinkedList() {
+	std::cout << "LIST DELETED";
+}
+void LinkedList::add(int x, int y) {
+	Node* node = new Node();
+	node->x = x;
+	node->y = y;
+	node->next = NULL;
+	this->tail->next->next = node;
+	this->tail = this->tail->next;
+	this->length++;
+}
+
 class Grain
 	:public RectangleShape{
 public:
 	bool alive;
-	double ro;
-	unsigned int grainID;
+	double energy;
+	int grainID;
 	Grain(){}
 };
 
@@ -74,7 +117,7 @@ bool isOnGrainBorder(Grain(**board), int x, int y)
 	return false;
 }
 
-unsigned int newID()
+int newID()
 {
 	return ++numberOfGrains;
 }
@@ -97,7 +140,7 @@ bool checkIfNewGrainCanBePlaced(Grain(**board), int x, int y)
 
 Color newColor()
 {
-	return Color(rand()%252+2, rand() % 252+2, rand() % 251+2);
+	return Color(rand()%252+20, rand() % 252+20, rand() % 251+2);
 }
 
 bool grainGrowth(Grain(**board), Grain(**newBoard)) {
@@ -868,9 +911,9 @@ void boardCreation(Grain(**board))
 		for (int j = 0; j < height; j++)
 		{
 			board[i][j].alive = 0;
-			board[i][j].ro = 0;
+			board[i][j].energy = 0;
 			board[i][j].grainID = 0;
-			board[i][j].draw = 0;
+			//board[i][j].draw = 0;
 			board[i][j].setSize(Vector2f(cellSize, cellSize)); //wielkosc pola to 100x100
 			board[i][j].setPosition(boardCoordinate_x + (float)i * cellSize, boardCoordinate_y + (float)j * cellSize); // plansza zaczyna sie od 50 piksela, pola rozstawione co 15 pikseli
 			board[i][j].setFillColor(Color(0, 0, 0));
@@ -1209,16 +1252,32 @@ Button dualPhase_Button("Dual phase", arimo, 15, menuCoordinateX + 185, menuCoor
 MyText boundarySize_Text("Boundary size:", arimo, 15, menuCoordinateX + 10, menuCoordinateY + 585);
 TextField boundarySize_TextField("1", arimo, 15, menuCoordinateX + 160, menuCoordinateY + 585, 135, 25, menuCoordinateX + 155, menuCoordinateY + 582);
 Button generateBoundaries_Button("GENERATE BOUNDARIES", arimo, 20, menuCoordinateX + 25, menuCoordinateY + 620, 280, 30, menuCoordinateX + 10, menuCoordinateY + 617);
-MyText saveTo_Text("Save as:", arimo, 15, menuCoordinateX + 10, menuCoordinateY + 900);
-Button save_bmp("*.bmp file", arimo, 15, menuCoordinateX + 98, menuCoordinateY + 900, 100, 25, menuCoordinateX + 80, menuCoordinateY + 897);
-Button save_txt("*.txt file", arimo, 15, menuCoordinateX + 215, menuCoordinateY + 900, 100, 25, menuCoordinateX + 190, menuCoordinateY + 897);
-MyText savePath_Text("Path:", arimo, 15, menuCoordinateX + 10, menuCoordinateY + 935);
-TextField saveFilename_TextField("map", arimo, 15, menuCoordinateX + 85, menuCoordinateY + 935, 210, 25, menuCoordinateX + 80, menuCoordinateY + 932);
-MyText importFrom_Text("Import:", arimo, 15, menuCoordinateX + 10, menuCoordinateY + 980);
-Button import_bmp("*.bmp file", arimo, 15, menuCoordinateX + 98, menuCoordinateY + 980, 100, 25, menuCoordinateX + 80, menuCoordinateY + 977);
-Button import_txt("*.txt file", arimo, 15, menuCoordinateX + 215, menuCoordinateY + 980, 100, 25, menuCoordinateX + 190, menuCoordinateY + 977);
-MyText importPath_Text("Path:", arimo, 15, menuCoordinateX + 10, menuCoordinateY + 1015);
-TextField importFilename_TextField("map", arimo, 15, menuCoordinateX + 85, menuCoordinateY + 1015, 210, 25, menuCoordinateX + 80, menuCoordinateY + 1012);
+Button monteCarlo_Button("MONTE CARLO", arimo, 20, menuCoordinateX + 75, menuCoordinateY + 680, 280, 30, menuCoordinateX + 10, menuCoordinateY + 677);
+MyText monteCarloIterations_Text("Iterations:", arimo, 15, menuCoordinateX + 10, menuCoordinateY + 720);
+TextField monteCarloIterations_TextField("10", arimo, 15, menuCoordinateX + 160, menuCoordinateY + 720, 135, 25, menuCoordinateX + 155, menuCoordinateY + 717);
+Button energyDistribution_Button("RECRYSTALISATION", arimo, 20, menuCoordinateX + 30, menuCoordinateY + 780, 280, 30, menuCoordinateX + 10, menuCoordinateY + 777);
+MyText energyDistribution_Text("Energy     MAX:                   MIN:", arimo, 15, menuCoordinateX + 10, menuCoordinateY + 820);
+TextField energyDistributionMAX_TextField("7", arimo, 15, menuCoordinateX + 125, menuCoordinateY + 820, 60, 25, menuCoordinateX + 120, menuCoordinateY + 817);
+TextField energyDistributionMIN_TextField("2", arimo, 15, menuCoordinateX + 235, menuCoordinateY + 820, 60, 25, menuCoordinateX + 230, menuCoordinateY + 817);
+Button distributionTypeHomogenous_Button("Homogenous", arimo, 15, menuCoordinateX + 85, menuCoordinateY + 855, 100, 25, menuCoordinateX + 80, menuCoordinateY + 852);
+Button distributionTypeHeterogenous_Button("Heterogenous", arimo, 15, menuCoordinateX + 193, menuCoordinateY + 855, 100, 25, menuCoordinateX + 190, menuCoordinateY + 852);
+MyText nucleationType_Text("Nucleation type:", arimo, 15, menuCoordinateX + 10, menuCoordinateY + 890);
+MyText nucleationStart_Text("Nucleation start:", arimo, 15, menuCoordinateX + 10, menuCoordinateY + 920);
+MyText SRXiterations_Text("Iterations:", arimo, 15, menuCoordinateX + 10, menuCoordinateY + 950);
+TextField SRXiterations_TextField("10", arimo, 15, menuCoordinateX + 85, menuCoordinateY + 950, 100, 25, menuCoordinateX + 80, menuCoordinateY + 947);
+//Button save_bmp("*.bmp file", arimo, 15, menuCoordinateX + 98, menuCoordinateY + 900, 100, 25, menuCoordinateX + 80, menuCoordinateY + 897);
+//Button save_txt("*.txt file", arimo, 15, menuCoordinateX + 215, menuCoordinateY + 900, 100, 25, menuCoordinateX + 190, menuCoordinateY + 897);
+//MyText savePath_Text("Path:", arimo, 15, menuCoordinateX + 10, menuCoordinateY + 935);
+//MyText saveTo_Text("Save as:", arimo, 15, menuCoordinateX + 10, menuCoordinateY + 900);
+//Button save_bmp("*.bmp file", arimo, 15, menuCoordinateX + 98, menuCoordinateY + 900, 100, 25, menuCoordinateX + 80, menuCoordinateY + 897);
+//Button save_txt("*.txt file", arimo, 15, menuCoordinateX + 215, menuCoordinateY + 900, 100, 25, menuCoordinateX + 190, menuCoordinateY + 897);
+//MyText savePath_Text("Path:", arimo, 15, menuCoordinateX + 10, menuCoordinateY + 935);
+//TextField saveFilename_TextField("map", arimo, 15, menuCoordinateX + 85, menuCoordinateY + 935, 210, 25, menuCoordinateX + 80, menuCoordinateY + 932);
+//MyText importFrom_Text("Import:", arimo, 15, menuCoordinateX + 10, menuCoordinateY + 980);
+//Button import_bmp("*.bmp file", arimo, 15, menuCoordinateX + 98, menuCoordinateY + 980, 100, 25, menuCoordinateX + 80, menuCoordinateY + 977);
+//Button import_txt("*.txt file", arimo, 15, menuCoordinateX + 215, menuCoordinateY + 980, 100, 25, menuCoordinateX + 190, menuCoordinateY + 977);
+//MyText importPath_Text("Path:", arimo, 15, menuCoordinateX + 10, menuCoordinateY + 1015);
+//TextField importFilename_TextField("map", arimo, 15, menuCoordinateX + 85, menuCoordinateY + 1015, 210, 25, menuCoordinateX + 80, menuCoordinateY + 1012);
 
 int main()
 {
@@ -1250,28 +1309,32 @@ int main()
 	inclusionsTypeCircular_Button.rectangle.setFillColor(Color(200, 0, 0));
 	
 	char kindOfNeighbourhood = 0, grainDraw = 0, ENTERING_TEXT = 0, ENTERING_TEXT2 = 0;
-	bool INIT = 1, READY = 0, START = 0, STOP = 0, gameStop = 0, borderCondition = 1, monteCarlo = 0, circularInclusions = 1, SIMULATION_FINISHED = 0, CA_SUBSTRUCTURE = 0, BORDERS = 0;
-	bool RESTART = 0, SHAPE_CONTROL = 0;
-	int initialNumberOfGrains = 200;
+	bool INIT = 1, READY = 0, START = 0, STOP = 0, gameStop = 0, borderCondition = 1, circularInclusions = 1, SIMULATION_FINISHED = 0, CA_SUBSTRUCTURE = 0, BORDERS = 0;
+	bool RESTART = 0, SHAPE_CONTROL = 0, homogenousDistribution = 1, energyDistributed = 0;
+	int monteCarloIterations = 10, MONTECARLOITERATIONS = 0, RECRYSTALISATION = 0;
+	int initialNumberOfGrains = 100;
 	numberOfRandomGrains.text.setString(std::to_string(initialNumberOfGrains));
 	Y_grainsNumber_TextField.text.setString(std::to_string(height));
 	X_grainsNumber_TextField.text.setString(std::to_string(width));
 
-	
-	Grain **board = NULL, **newBoard = NULL;
+	Grain **board = NULL, **newBoard = NULL, **energyBoard = NULL;
 	board = new Grain*[width];
 	for (int i = 0; i < width; ++i)
 		board[i] = new Grain[height];
 	newBoard = new Grain*[width];
 	for (int i = 0; i < width; ++i)
 		newBoard[i] = new Grain[height];
+	energyBoard = new Grain*[width];
+	for (int i = 0; i < width; ++i)
+		energyBoard[i] = new Grain[height];
 	boardCreation(board);
 	boardCreation(newBoard);
+	boardCreation(energyBoard);
 	
 	Vector2f mousePosition;
 	int x = 0, y = 0;
 
-	sf::RenderWindow window(sf::VideoMode(1920, 1080, 32), "Multiscale Modelling", sf::Style::Default);	//glowne okno aplikacji
+	sf::RenderWindow window(sf::VideoMode(1920, 1080, 32), "Multiscale Modelling", sf::Style::Fullscreen);	//glowne okno aplikacji
 	window.setPosition(Vector2i(0, 0));
 
 	while (window.isOpen())
@@ -1382,6 +1445,60 @@ int main()
 						}
 					}
 					else generateBoundaries_Button.rectangle.setOutlineColor(Color(40, 40, 40));
+
+					if (monteCarlo_Button.rectangle.getGlobalBounds().contains(Vector2f(Mouse::getPosition(window))))
+					{
+						monteCarlo_Button.rectangle.setOutlineColor(Color(200, 200, 200));
+						if (Mouse::isButtonPressed(Mouse::Left))
+						{
+							LinkedList* list = new LinkedList();
+							vector< pair <int, int> > cells;
+							for (int i = 1; i < width - 1; i++)
+								for (int j = 1; j < height - 1; j++)
+									if(board[i][j].grainID == 0)
+										list->add(i, j);
+
+							while (list->length != 0) {
+								int index = (rand() % (list->length)) + 1;
+								Node* tmp = new Node();
+								tmp = list->head->next;
+								for (int i = 1; i < index-2; i++)
+									tmp = tmp->next;
+
+								int id = 10000 + rand() % 10;
+								board[tmp->next->x][tmp->next->y].grainID = id;
+
+								if (tmp->next->next) {
+									tmp->next->x = tmp->next->next->x;
+									tmp->next->y = tmp->next->next->y;
+									Node* wsk = tmp->next->next->next;
+									delete tmp->next->next;
+									tmp->next->next = wsk;
+								}
+								else {
+									delete tmp->next;
+								}
+								list->length--;
+							}
+
+							int col = 10000;
+							for (int xx = 0; xx < 10; xx++) {
+								sf::Color newColour = newColor();
+								for (int i = 1; i < width - 1; i++)
+									for (int j = 1; j < height - 1; j++) {
+										//cout << board[i][j].grainID << endl;
+										if (board[i][j].grainID == (col+xx))
+											board[i][j].setFillColor(newColour);
+									}
+							}
+
+							delete list;
+							INIT = 0;
+							MONTECARLOITERATIONS = monteCarloIterations;
+							break;
+						}
+					}
+					else monteCarlo_Button.rectangle.setOutlineColor(Color(40, 40, 40));
 
 					if (shapeControl_Button.rectangle.getGlobalBounds().contains(Vector2f(Mouse::getPosition(window))))
 					{
@@ -1514,49 +1631,49 @@ int main()
 					}
 					else losuj.rectangle.setOutlineColor(Color(40, 40, 40));
 
-					if (import_bmp.rectangle.getGlobalBounds().contains(Vector2f(Mouse::getPosition(window))))
-					{
-						import_bmp.rectangle.setOutlineColor(Color(200, 200, 200));
-						if (Mouse::isButtonPressed(Mouse::Left))
-						{
-							readBMP(importFilename, board);
-							for (int i = 1; i < width - 1; i++)
-								for (int j = 1; j < height - 1; j++)
-									newBoard[i][j] = board[i][j];
-							Y_grainsNumber_TextField.text.setString(std::to_string(height));
-							X_grainsNumber_TextField.text.setString(std::to_string(width));
-							INIT = 0;
-							READY = 1;
-						}
-					}
-					else import_bmp.rectangle.setOutlineColor(Color(40, 40, 40));
+					//if (import_bmp.rectangle.getGlobalBounds().contains(Vector2f(Mouse::getPosition(window))))
+					//{
+					//	import_bmp.rectangle.setOutlineColor(Color(200, 200, 200));
+					//	if (Mouse::isButtonPressed(Mouse::Left))
+					//	{
+					//		readBMP(importFilename, board);
+					//		for (int i = 1; i < width - 1; i++)
+					//			for (int j = 1; j < height - 1; j++)
+					//				newBoard[i][j] = board[i][j];
+					//		Y_grainsNumber_TextField.text.setString(std::to_string(height));
+					//		X_grainsNumber_TextField.text.setString(std::to_string(width));
+					//		INIT = 0;
+					//		READY = 1;
+					//	}
+					//}
+					//else import_bmp.rectangle.setOutlineColor(Color(40, 40, 40));
 
-					if (import_txt.rectangle.getGlobalBounds().contains(Vector2f(Mouse::getPosition(window))))
-					{
-						import_txt.rectangle.setOutlineColor(Color(200, 200, 200));
-						if (Mouse::isButtonPressed(Mouse::Left))
-						{
-							readTXT(importFilename+".txt", board);
-							for (int i = 1; i < width - 1; i++)
-								for (int j = 1; j < height - 1; j++)
-									newBoard[i][j] = board[i][j];
-							Y_grainsNumber_TextField.text.setString(std::to_string(height));
-							X_grainsNumber_TextField.text.setString(std::to_string(width));
-							INIT = 0;
-							READY = 1;
-						}
-					}
-					else import_txt.rectangle.setOutlineColor(Color(40, 40, 40));
+					//if (import_txt.rectangle.getGlobalBounds().contains(Vector2f(Mouse::getPosition(window))))
+					//{
+					//	import_txt.rectangle.setOutlineColor(Color(200, 200, 200));
+					//	if (Mouse::isButtonPressed(Mouse::Left))
+					//	{
+					//		readTXT(importFilename+".txt", board);
+					//		for (int i = 1; i < width - 1; i++)
+					//			for (int j = 1; j < height - 1; j++)
+					//				newBoard[i][j] = board[i][j];
+					//		Y_grainsNumber_TextField.text.setString(std::to_string(height));
+					//		X_grainsNumber_TextField.text.setString(std::to_string(width));
+					//		INIT = 0;
+					//		READY = 1;
+					//	}
+					//}
+					//else import_txt.rectangle.setOutlineColor(Color(40, 40, 40));
 
-					if (importFilename_TextField.rectangle.getGlobalBounds().contains(Vector2f(Mouse::getPosition(window))))
-					{
-						importFilename_TextField.rectangle.setOutlineColor(Color(200, 200, 200));
-						if (Mouse::isButtonPressed(Mouse::Left))
-						{
-							ENTERING_TEXT = 6;
-						}
-					}
-					else Y_grainsNumber_TextField.rectangle.setOutlineColor(Color(40, 40, 40));
+					//if (importFilename_TextField.rectangle.getGlobalBounds().contains(Vector2f(Mouse::getPosition(window))))
+					//{
+					//	importFilename_TextField.rectangle.setOutlineColor(Color(200, 200, 200));
+					//	if (Mouse::isButtonPressed(Mouse::Left))
+					//	{
+					//		ENTERING_TEXT = 6;
+					//	}
+					//}
+					//else Y_grainsNumber_TextField.rectangle.setOutlineColor(Color(40, 40, 40));
 
 					if (Y_grainsNumber_TextField.rectangle.getGlobalBounds().contains(Vector2f(Mouse::getPosition(window))))
 					{
@@ -1632,6 +1749,32 @@ int main()
 					else if (circularInclusions)
 						inclusionsTypeSquare_Button.rectangle.setOutlineColor(Color(40, 40, 40));
 
+					if (!homogenousDistribution && distributionTypeHomogenous_Button.rectangle.getGlobalBounds().contains(Vector2f(Mouse::getPosition(window))))
+					{
+						distributionTypeHomogenous_Button.rectangle.setOutlineColor(Color(200, 200, 200));
+						if (Mouse::isButtonPressed(Mouse::Left))
+						{
+							distributionTypeHomogenous_Button.rectangle.setFillColor(Color(200, 0, 0));
+							distributionTypeHeterogenous_Button.rectangle.setFillColor(Color(100, 100, 100));
+							homogenousDistribution = 1;
+						}
+					}
+					else if (!homogenousDistribution)
+						distributionTypeHomogenous_Button.rectangle.setOutlineColor(Color(40, 40, 40));
+
+					if (homogenousDistribution && distributionTypeHeterogenous_Button.rectangle.getGlobalBounds().contains(Vector2f(Mouse::getPosition(window))))
+					{
+						distributionTypeHeterogenous_Button.rectangle.setOutlineColor(Color(200, 200, 200));
+						if (Mouse::isButtonPressed(Mouse::Left))
+						{
+							distributionTypeHomogenous_Button.rectangle.setFillColor(Color(100, 100, 100));
+							distributionTypeHeterogenous_Button.rectangle.setFillColor(Color(200, 0, 0));
+							homogenousDistribution = 0;
+						}
+					}
+					else if (homogenousDistribution)
+						distributionTypeHeterogenous_Button.rectangle.setOutlineColor(Color(40, 40, 40));
+
 					if (addInclusions_Button.rectangle.getGlobalBounds().contains(Vector2f(Mouse::getPosition(window))))
 					{
 						addInclusions_Button.rectangle.setOutlineColor(Color(200, 200, 200));
@@ -1704,6 +1847,7 @@ int main()
 					break;
 				}
 				case 6: {
+					/*
 					if (event.text.unicode == 59) {
 						string s = importFilename_TextField.text.getString();
 						string st = s.substr(0, s.size() - 1);
@@ -1717,6 +1861,7 @@ int main()
 						ENTERING_TEXT = 0;
 						importFilename = importFilename_TextField.text.getString();
 					}
+					*/
 					break;
 				}
 				case 7: {
@@ -1786,6 +1931,7 @@ int main()
 					}
 					else start.rectangle.setOutlineColor(Color(40, 40, 40));
 
+					/*
 					if (save_bmp.rectangle.getGlobalBounds().contains(Vector2f(Mouse::getPosition(window))))
 					{
 						save_bmp.rectangle.setOutlineColor(Color(200, 200, 200));
@@ -1819,7 +1965,7 @@ int main()
 						}
 					}
 					else save_txt.rectangle.setOutlineColor(Color(40, 40, 40));
-
+					*/
 					if (inclusionsNumber_TextField.rectangle.getGlobalBounds().contains(Vector2f(Mouse::getPosition(window))))
 					{
 						inclusionsNumber_TextField.rectangle.setOutlineColor(Color(200, 200, 200));
@@ -1907,6 +2053,7 @@ int main()
 					break;
 				}
 				case 3: {
+					/*
 					if (event.text.unicode == 59) {
 						string s = saveFilename_TextField.text.getString();
 						string st = s.substr(0, s.size() - 1);
@@ -1919,6 +2066,7 @@ int main()
 						ENTERING_TEXT2 = 0;
 						saveFilename = saveFilename_TextField.text.getString();
 					}
+					*/
 					break;
 				}
 				default: {
@@ -1926,19 +2074,242 @@ int main()
 				}
 				}
 			}
+			if (RECRYSTALISATION) {
+				//losowanie init grains
+				for (int i = 0; i < SRXnumberOfGrains; i++)
+				{
+					while (1) {
+						x = rand() % (width - 2) + 1;
+						y = rand() % (height - 2) + 1;
+						if (board[x][y].grainID >= 0 && isOnGrainBorder(board, x,y))
+						{
+							board[x][y].alive = 1;
+							board[x][y].grainID = -newID();
+							board[x][y].energy = 0;
+							board[x][y].setFillColor(Color(0,rand()%100+10, rand() % 100));
+							break;
+						}
+					}
+				}
+
+				LinkedList* list = new LinkedList();
+				vector< pair <int, int> > cells;
+				for (int i = 1; i < width - 1; i++)
+					for (int j = 1; j < height - 1; j++)
+						if (board[i][j].grainID >= 0)
+							list->add(i, j);
+
+				while (list->length != 0) {
+					int index = (rand() % (list->length)) + 1;
+					Node* tmp = new Node();
+					tmp = list->head->next;
+					for (int i = 1; i < index; i++)
+						tmp = tmp->next;
+
+					bool nucleusInNeighbourhood = 0;
+					//sprawdzic czy w sasiedztwie nucleusa
+					for (int a = -1; a < 2; a++)
+						for (int b = -1; b < 2; b++)
+							if (board[tmp->next->x + a][tmp->next->y + b].grainID < -1) {
+								nucleusInNeighbourhood = 1;
+								break;
+							}
+
+					if (nucleusInNeighbourhood) {
+						//policzyc sasiadow
+						//
+						int differentNeighboursCounter = 0;
+						int differentNeighboursCounter_try = 0;
+						for (int a = -1; a < 2; a++)
+							for (int b = -1; b < 2; b++)
+								if (board[tmp->next->x][tmp->next->y].grainID != board[tmp->next->x + a][tmp->next->y + b].grainID)
+									differentNeighboursCounter++;
+
+						if (differentNeighboursCounter > 0) {
+							Grain* tryThisGrain = NULL;
+							int counter = 30;
+							while (counter) {
+								int a = rand() % 3 - 1;
+								int b = rand() % 3 - 1;
+								counter--;
+								if (board[tmp->next->x + a][tmp->next->y + b].grainID < -1) {
+									tryThisGrain = &board[tmp->next->x + a][tmp->next->y + b];
+									break;
+								}
+							}
+							//for (int a = -1; a < 2; a++)
+							//	for (int b = -1; b < 2; b++)
+							if (tryThisGrain != NULL) {
+								for (int a = -1; a < 2; a++)
+									for (int b = -1; b < 2; b++)
+										if (tryThisGrain->grainID != board[tmp->next->x + a][tmp->next->y + b].grainID)
+											differentNeighboursCounter_try++;
+
+								if (differentNeighboursCounter_try <= differentNeighboursCounter + board[tmp->next->x][tmp->next->y].energy) {
+									board[tmp->next->x][tmp->next->y].grainID = tryThisGrain->grainID;
+									board[tmp->next->x][tmp->next->y].energy = 0;
+									board[tmp->next->x][tmp->next->y].setFillColor(tryThisGrain->getFillColor());
+								}
+							}
+						}
+					}
+
+					if (tmp->next->next) {
+						tmp->next->x = tmp->next->next->x;
+						tmp->next->y = tmp->next->next->y;
+						Node* wsk = tmp->next->next->next;
+						//delete tmp->next->next;
+						tmp->next->next = wsk;
+					}
+					else {
+						delete tmp->next;
+					}
+					list->length--;
+				}
+
+				delete list;
+				RECRYSTALISATION--;
+				if (!RECRYSTALISATION)
+					//INIT = 1;
+					SIMULATION_FINISHED = 1;
+				for (int i = 1; i < width - 1; i++)
+					for (int j = 1; j < height - 1; j++)
+						newBoard[i][j] = board[i][j];
+				break;
+			}
 			if (SIMULATION_FINISHED) {
 				if (restart.rectangle.getGlobalBounds().contains(Vector2f(Mouse::getPosition(window))))
 				{
 					restart.rectangle.setOutlineColor(Color(200, 200, 200));
 					if (Mouse::isButtonPressed(Mouse::Left))
 					{
+						energyDistributed = 0;
 						SIMULATION_FINISHED = 0;
 						RESTART = 1;
 						break;
 					}
 				}
 				else restart.rectangle.setOutlineColor(Color(40, 40, 40));
+
+				if (losuj.rectangle.getGlobalBounds().contains(Vector2f(Mouse::getPosition(window))))
+				{
+					losuj.rectangle.setOutlineColor(Color(200, 200, 200));
+					if (Mouse::isButtonPressed(Mouse::Left))
+					{
+						SRXnumberOfGrains = 50;
+						for (int i = 0; i < SRXnumberOfGrains; i++)
+						{
+							while (1) {
+								x = rand() % (width - 2) + 1;
+								y = rand() % (height - 2) + 1;
+								if (board[x][y].grainID >= 0)
+								{
+									board[x][y].alive = 1;
+									board[x][y].grainID = -newID();
+									board[x][y].energy = 0;
+									board[x][y].setFillColor(Color(0, rand() % 100, rand() % 100));
+									break;
+								}
+							}
+						}
+						SRXnumberOfGrains = 0;
+						break;
+
+					}
+				}
+				else losuj.rectangle.setOutlineColor(Color(40, 40, 40));
+
+				if (!homogenousDistribution && distributionTypeHomogenous_Button.rectangle.getGlobalBounds().contains(Vector2f(Mouse::getPosition(window))))
+				{
+					distributionTypeHomogenous_Button.rectangle.setOutlineColor(Color(200, 200, 200));
+					if (Mouse::isButtonPressed(Mouse::Left))
+					{
+						distributionTypeHomogenous_Button.rectangle.setFillColor(Color(200, 0, 0));
+						distributionTypeHeterogenous_Button.rectangle.setFillColor(Color(100, 100, 100));
+						homogenousDistribution = 1;
+					}
+				}
+				else if (!homogenousDistribution)
+					distributionTypeHomogenous_Button.rectangle.setOutlineColor(Color(40, 40, 40));
+
+				if (homogenousDistribution && distributionTypeHeterogenous_Button.rectangle.getGlobalBounds().contains(Vector2f(Mouse::getPosition(window))))
+				{
+					distributionTypeHeterogenous_Button.rectangle.setOutlineColor(Color(200, 200, 200));
+					if (Mouse::isButtonPressed(Mouse::Left))
+					{
+						distributionTypeHomogenous_Button.rectangle.setFillColor(Color(100, 100, 100));
+						distributionTypeHeterogenous_Button.rectangle.setFillColor(Color(200, 0, 0));
+						homogenousDistribution = 0;
+					}
+				}
+				else if (homogenousDistribution)
+					distributionTypeHeterogenous_Button.rectangle.setOutlineColor(Color(40, 40, 40));
 				
+				if (energyDistribution_Button.rectangle.getGlobalBounds().contains(Vector2f(Mouse::getPosition(window))))
+				{
+					energyDistribution_Button.rectangle.setOutlineColor(Color(200, 200, 200));
+					if (Mouse::isButtonPressed(Mouse::Left))
+					{
+						if (!energyDistributed) {
+							if (homogenousDistribution) {
+								for (int i = 1; i < width - 1; i++)
+									for (int j = 1; j < height - 1; j++)
+										board[i][j].energy = energyMAX;
+							}
+							else {
+
+
+								for (int i = 1; i < width - 1; i++)
+									for (int j = 1; j < height - 1; j++)
+										for (int a = -1; a < 2; a++)
+											for (int b = 0; b < 2; b++)
+												if (board[i][j].grainID > 1 && board[i][j].grainID != board[i + a][j + b].grainID) {
+													board[i][j].energy = energyMAX;
+													//newBoard[i][j].setFillColor(Color(0, 0, 0));
+													break;
+												}
+												else board[i][j].energy = energyMIN;
+							}
+
+							for (int i = 1; i < width - 1; i++)
+								for (int j = 1; j < height - 1; j++) {
+									if (board[i][j].energy == energyMAX) {
+										energyBoard[i][j].setFillColor(Color(255, 0, 0));
+									}
+									else if (board[i][j].energy == energyMIN) {
+										energyBoard[i][j].setFillColor(Color(0, 0, 255));
+									}
+									else
+										energyBoard[i][j].setFillColor(Color(255, 255, 255));
+									window.draw(energyBoard[i][j]);
+								}
+
+							energyDistributed = 1;
+						}
+						else {
+							for (int i = 1; i < width - 1; i++)
+								for (int j = 1; j < height - 1; j++) {
+									if (board[i][j].energy == energyMAX) {
+										energyBoard[i][j].setFillColor(Color(255, 0, 0));
+									}
+									else if (board[i][j].energy == energyMIN) {
+										energyBoard[i][j].setFillColor(Color(0, 0, 255));
+									} else
+										energyBoard[i][j].setFillColor(Color(255, 255, 255));
+									window.draw(energyBoard[i][j]);
+								}
+						}
+						window.display();
+						sleep(sf::seconds(4));
+
+
+						SIMULATION_FINISHED = 0;
+						RECRYSTALISATION = 10;
+						break;
+					}
+				}
+				else energyDistribution_Button.rectangle.setOutlineColor(Color(40, 40, 40));
+
 				if (substructure_Button.rectangle.getGlobalBounds().contains(Vector2f(Mouse::getPosition(window))))
 				{
 					substructure_Button.rectangle.setOutlineColor(Color(200, 200, 200));
@@ -2008,6 +2379,66 @@ int main()
 					}
 				}
 				else generateBoundaries_Button.rectangle.setOutlineColor(Color(40, 40, 40));
+
+				if (monteCarlo_Button.rectangle.getGlobalBounds().contains(Vector2f(Mouse::getPosition(window))))
+				{
+					monteCarlo_Button.rectangle.setOutlineColor(Color(200, 200, 200));
+					if (Mouse::isButtonPressed(Mouse::Left))
+					{
+						for (int i = 1; i < width - 1; i++)
+							for (int j = 1; j < height - 1; j++)
+								if (!isChoosen(board[i][j].grainID)) {
+									newBoard[i][j].alive = 0;
+									newBoard[i][j].grainID = 0;
+									newBoard[i][j].setFillColor(Color(0, 0, 0));
+								}
+								else {
+									newBoard[i][j].alive = 1;
+									newBoard[i][j].grainID = -2;
+									newBoard[i][j].setFillColor(board[i][j].getFillColor());
+								}
+						for (int i = 1; i < width - 1; i++)
+							for (int j = 1; j < height - 1; j++)
+								board[i][j] = newBoard[i][j];
+
+						LinkedList* list = new LinkedList();
+						vector< pair <int, int> > cells;
+
+						for (int i = 1; i < width - 1; i++)
+							for (int j = 1; j < height - 1; j++)
+								if(board[i][j].grainID == 0)
+									list->add(i, j);
+
+						while (list->length != 0) {
+							int index = (rand() % (list->length)) + 1;
+							Node* tmp = new Node();
+							tmp = list->head->next;
+							for (int i = 1; i < index-2; i++)
+								tmp = tmp->next;
+
+							board[tmp->next->x][tmp->next->y].setFillColor(newColor());
+							board[tmp->next->x][tmp->next->y].grainID = newID();
+
+							if (tmp->next->next) {
+								tmp->next->x = tmp->next->next->x;
+								tmp->next->y = tmp->next->next->y;
+								Node* wsk = tmp->next->next->next;
+								delete tmp->next->next;
+								tmp->next->next = wsk;
+							}
+							else {
+								delete tmp->next;
+							}
+							list->length--;
+						}
+
+						delete list;
+						SIMULATION_FINISHED = 0;
+						MONTECARLOITERATIONS = monteCarloIterations;
+						break;
+					}
+				}
+				else monteCarlo_Button.rectangle.setOutlineColor(Color(40, 40, 40));
 
 				if (Vector2f(Mouse::getPosition(window)).y > boardCoordinate_y - 1 && Vector2f(Mouse::getPosition(window)).y < (cellSize*height + boardCoordinate_y) && Vector2f(Mouse::getPosition(window)).x > boardCoordinate_x - 1 && Vector2f(Mouse::getPosition(window)).x < (cellSize*width+boardCoordinate_x))
 				{
@@ -2089,254 +2520,82 @@ int main()
 				RESTART = 0;
 				INIT = 1;
 			}
-
-			if (gameStop)
-			{
-				t += 0.001;
-				ro1 = C + (1 - C)*pow(e, (-B*t));
-				double deltaRo = abs(ro1 - ro0);
-				ro0 = ro1;
-				double roKom = deltaRo / (height*width);
-				unsigned int borderCellCounter = 0;
-				std::cout << roKom << std::endl;
-				for (auto i = 2; i < width - 2; i++)
-					for (auto j = 2; j < height - 2; j++)
-					{
-						if (isOnGrainBorder(board, i, j))
-						{
-							board[i][j].ro += 0.8*roKom;
-
-							deltaRo -= 0.8*roKom;
-							borderCellCounter++;
-							if (board[i][j].ro > roCritical)
-							{
-								start.rectangle.setFillColor(Color(rand() % 256, rand() % 256, rand() % 256));
-								board[i][j].ro = 0;
-								board[i][j].grainID = newIDRegenerated();
-								board[i][j].setFillColor(newColor());
-								board[i + 1][j].ro = 0;
-								board[i + 1][j].grainID = board[i][j].grainID;
-								board[i + 1][j].setFillColor(board[i][j].getFillColor());
-								board[i - 1][j].ro = 0;
-								board[i - 1][j].grainID = board[i][j].grainID;
-								board[i - 1][j].setFillColor(board[i][j].getFillColor());
-								board[i + 1][j + 1].ro = 0;
-								board[i + 1][j + 1].grainID = board[i][j].grainID;
-								board[i + 1][j + 1].setFillColor(board[i][j].getFillColor());
-								board[i + 1][j - 1].ro = 0;
-								board[i + 1][j - 1].grainID = board[i][j].grainID;
-								board[i + 1][j - 1].setFillColor(board[i][j].getFillColor());
-								board[i - 1][j + 1].ro = 0;
-								board[i - 1][j + 1].grainID = board[i][j].grainID;
-								board[i - 1][j + 1].setFillColor(board[i][j].getFillColor());
-								board[i - 1][j - 1].ro = 0;
-								board[i - 1][j - 1].grainID = board[i][j].grainID;
-								board[i - 1][j - 1].setFillColor(board[i][j].getFillColor());
-								board[i][j + 1].ro = 0;
-								board[i][j + 1].grainID = board[i][j].grainID;
-								board[i][j + 1].setFillColor(board[i][j].getFillColor());
-								board[i][j - 1].ro = 0;
-								board[i][j - 1].grainID = board[i][j].grainID;
-								board[i][j - 1].setFillColor(board[i][j].getFillColor());
-							}
-						}
-						else
-						{
-							board[i][j].ro += 0.2*roKom;
-							deltaRo -= 0.2*roKom;
-							if (board[i][j].ro > roCritical)
-							{
-								board[i][j].ro = 0;
-								board[i][j].grainID = newIDRegenerated();
-								board[i][j].setFillColor(newColor());
-								board[i + 1][j].ro = 0;
-								board[i + 1][j].grainID = board[i][j].grainID;
-								board[i + 1][j].setFillColor(board[i][j].getFillColor());
-								board[i - 1][j].ro = 0;
-								board[i - 1][j].grainID = board[i][j].grainID;
-								board[i - 1][j].setFillColor(board[i][j].getFillColor());
-								board[i + 1][j + 1].ro = 0;
-								board[i + 1][j + 1].grainID = board[i][j].grainID;
-								board[i + 1][j + 1].setFillColor(board[i][j].getFillColor());
-								board[i + 1][j - 1].ro = 0;
-								board[i + 1][j - 1].grainID = board[i][j].grainID;
-								board[i + 1][j - 1].setFillColor(board[i][j].getFillColor());
-								board[i - 1][j + 1].ro = 0;
-								board[i - 1][j + 1].grainID = board[i][j].grainID;
-								board[i - 1][j + 1].setFillColor(board[i][j].getFillColor());
-								board[i - 1][j - 1].ro = 0;
-								board[i - 1][j - 1].grainID = board[i][j].grainID;
-								board[i - 1][j - 1].setFillColor(board[i][j].getFillColor());
-								board[i][j + 1].ro = 0;
-								board[i][j + 1].grainID = board[i][j].grainID;
-								board[i][j + 1].setFillColor(board[i][j].getFillColor());
-								board[i][j - 1].ro = 0;
-								board[i][j - 1].grainID = board[i][j].grainID;
-								board[i][j - 1].setFillColor(board[i][j].getFillColor());
-							}
-						}
-					}
-
-				roKom = deltaRo / 2;
-				sleep(milliseconds(10));
-				for (auto a = 0; a < 2;)
-				{
-					int i = rand() % (width - 4) + 2;
-					int j = rand() % (height - 4) + 2;
-					if (isOnGrainBorder(board, i, j))
-					{
-						/*gameStart = 1;
-						gameStop = 0;*/
-						board[i][j].ro += roKom;
-						a++;
-						if (board[i][j].ro > roCritical)
-						{
-							newBoard[i][j].ro = 0;
-							newBoard[i][j].alive = 1;
-							newBoard[i][j].grainID = newIDRegenerated();
-							newBoard[i][j].setFillColor(newColor());
-							newBoard[i + 1][j].ro = 0;
-							newBoard[i + 1][j].alive = 1;
-							newBoard[i + 1][j].grainID = newBoard[i][j].grainID;
-							newBoard[i + 1][j].setFillColor(newBoard[i][j].getFillColor());
-							newBoard[i - 1][j].ro = 0;
-							newBoard[i - 1][j].alive = 1;
-							newBoard[i - 1][j].grainID = newBoard[i][j].grainID;
-							newBoard[i - 1][j].setFillColor(newBoard[i][j].getFillColor());
-							newBoard[i + 1][j + 1].ro = 0;
-							newBoard[i + 1][j + 1].alive = 1;
-							newBoard[i + 1][j + 1].grainID = newBoard[i][j].grainID;
-							newBoard[i + 1][j + 1].setFillColor(newBoard[i][j].getFillColor());
-							newBoard[i + 1][j - 1].ro = 0;
-							newBoard[i + 1][j - 1].alive = 1;
-							newBoard[i + 1][j - 1].grainID = newBoard[i][j].grainID;
-							newBoard[i + 1][j - 1].setFillColor(newBoard[i][j].getFillColor());
-							newBoard[i - 1][j + 1].ro = 0;
-							newBoard[i - 1][j + 1].alive = 1;
-							newBoard[i - 1][j + 1].grainID = newBoard[i][j].grainID;
-							newBoard[i - 1][j + 1].setFillColor(newBoard[i][j].getFillColor());
-							newBoard[i - 1][j - 1].ro = 0;
-							newBoard[i - 1][j - 1].alive = 1;
-							newBoard[i - 1][j - 1].grainID = newBoard[i][j].grainID;
-							newBoard[i - 1][j - 1].setFillColor(newBoard[i][j].getFillColor());
-							newBoard[i][j + 1].ro = 0;
-							newBoard[i][j + 1].alive = 1;
-							newBoard[i][j + 1].grainID = newBoard[i][j].grainID;
-							newBoard[i][j + 1].setFillColor(newBoard[i][j].getFillColor());
-							newBoard[i][j - 1].ro = 0;
-							newBoard[i][j - 1].alive = 1;
-							newBoard[i][j - 1].grainID = newBoard[i][j].grainID;
-							newBoard[i][j - 1].setFillColor(newBoard[i][j].getFillColor());
-						}
-					}
-				}
-
-
+			if (MONTECARLOITERATIONS) {
+				LinkedList* list = new LinkedList();
+				vector< pair <int, int> > cells;
 				for (int i = 1; i < width - 1; i++)
 					for (int j = 1; j < height - 1; j++)
-						board[i][j] = newBoard[i][j];
-			}
+						if (board[i][j].grainID >= 0)
+						list->add(i, j);
 
+				while (list->length != 0) {
+					int index = (rand() % (list->length)) + 1;
+					Node* tmp = new Node();
+					tmp = list->head->next;
+					for (int i = 1; i < index; i++)
+						tmp = tmp->next;
+
+					//policzyc sasiadow
+					//
+					int differentNeighboursCounter = 0;
+					int differentNeighboursCounter_try = 0;
+					for (int a = -1; a < 2; a++)
+						for (int b = -1; b < 2; b++)
+							if (board[tmp->next->x][tmp->next->y].grainID != board[tmp->next->x + a][tmp->next->y + b].grainID)
+								differentNeighboursCounter++;
+
+					if (differentNeighboursCounter > 3) {
+						Grain* tryThisGrain = NULL;
+						int counter = 30;
+						while (counter) {
+							int a = rand() % 3 - 1;
+							int b = rand() % 3 - 1;
+							counter--;
+							if (board[tmp->next->x][tmp->next->y].grainID != board[tmp->next->x + a][tmp->next->y + b].grainID && board[tmp->next->x + a][tmp->next->y + b].grainID > 1) {
+								tryThisGrain = &board[tmp->next->x + a][tmp->next->y + b];
+								break;
+							}
+						}
+						//for (int a = -1; a < 2; a++)
+						//	for (int b = -1; b < 2; b++)
+						if (tryThisGrain != NULL) {
+							for (int a = -1; a < 2; a++)
+								for (int b = -1; b < 2; b++)
+									if (tryThisGrain->grainID != board[tmp->next->x + a][tmp->next->y + b].grainID)
+										differentNeighboursCounter_try++;
+
+							if (differentNeighboursCounter_try <= differentNeighboursCounter) {
+								board[tmp->next->x][tmp->next->y].grainID = tryThisGrain->grainID;
+								board[tmp->next->x][tmp->next->y].setFillColor(tryThisGrain->getFillColor());
+							}
+						}
+					}
+
+					if (tmp->next->next) {
+						tmp->next->x = tmp->next->next->x;
+						tmp->next->y = tmp->next->next->y;
+						Node* wsk = tmp->next->next->next;
+						//delete tmp->next->next;
+						tmp->next->next = wsk;
+					}
+					else {
+						delete tmp->next;
+					}
+					list->length--;
+				}
+
+				delete list;
+				MONTECARLOITERATIONS--;
+				if (!MONTECARLOITERATIONS)
+					//INIT = 1;
+					SIMULATION_FINISHED = 1;
+				break;
+			}
 			if (event.type == sf::Event::Closed)
 				window.close();
 
 			if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape)
 				window.close();
-		}
-
-		if (monteCarlo)
-		{
-			vector< pair <int, int> > cells;
-			for (int i = 1; i < width - 1; i++)
-				for (int j = 1; j < height - 1; j++)
-					
-
-
-			int i, j;
-			for (auto c = 2; c < 500; c++)
-				for (auto d = 2; d < 500; d++)
-				{
-
-					i = rand() % (width - 2) + 1;
-					j = rand() % (height - 2) + 1;
-					if (board[i][j].draw == 0)
-					{
-						board[i][j].draw = 1;
-					}
-					else
-					{
-						continue;
-					}
-					int counter = 0;
-					int a, b;
-					if (board[i + 1][j].grainID != board[i][j].grainID)
-						counter++;
-					if (board[i - 1][j].grainID != board[i][j].grainID)
-						counter++;
-					if (board[i + 1][j + 1].grainID != board[i][j].grainID)
-						counter++;
-					if (board[i + 1][j - 1].grainID != board[i][j].grainID)
-						counter++;
-					if (board[i - 1][j + 1].grainID != board[i][j].grainID)
-						counter++;
-					if (board[i - 1][j - 1].grainID != board[i][j].grainID)
-						counter++;
-					if (board[i][j + 1].grainID != board[i][j].grainID)
-						counter++;
-					if (board[i][j - 1].grainID != board[i][j].grainID)
-						counter++;
-
-					if (counter == 0)
-						continue;
-
-					int id = board[i][j].grainID;
-					int z = 0;
-					while (id == board[i][j].grainID && z < 50)
-					{
-						z++;
-						a = rand() % 3 - 1;
-						b = rand() % 3 - 1;
-						if (board[i + a][j + b].grainID == 0)
-						{
-							z = 50;
-							break;
-						}
-						id = board[i + a][j + b].grainID;
-
-
-					}
-					if (z == 50)
-						continue;
-
-					int counter2 = 0;
-					if (board[i + 1][j].grainID != id)
-						counter2++;
-					if (board[i - 1][j].grainID != id)
-						counter2++;
-					if (board[i + 1][j + 1].grainID != id)
-						counter2++;
-					if (board[i + 1][j - 1].grainID != id)
-						counter2++;
-					if (board[i - 1][j + 1].grainID != id)
-						counter2++;
-					if (board[i - 1][j - 1].grainID != id)
-						counter2++;
-					if (board[i][j + 1].grainID != id)
-						counter2++;
-					if (board[i][j - 1].grainID != id)
-						counter2++;
-
-					if (counter2 <= counter)
-					{
-						//std::cout << counter2 << std::endl;
-						board[i][j].grainID = board[i + a][j + b].grainID;
-						board[i][j].setFillColor(board[i + a][j + b].getFillColor());
-
-						//newBoard[i][j] = board[i + a][j + b];
-						//board[i][j] = newBoard[i][j];
-					}
-
-				}
 		}
 
 		for (int i = 1; i < width - 1; i++)
@@ -2412,6 +2671,23 @@ int main()
 		window.draw(boundarySize_TextField.text);
 		window.draw(generateBoundaries_Button.rectangle);
 		window.draw(generateBoundaries_Button.text);
+		window.draw(monteCarlo_Button.rectangle);
+		window.draw(monteCarlo_Button.text);
+		window.draw(monteCarloIterations_Text);
+		window.draw(monteCarloIterations_TextField.rectangle);
+		window.draw(monteCarloIterations_TextField.text);
+		window.draw(energyDistribution_Text);
+		window.draw(energyDistributionMAX_TextField.rectangle);
+		window.draw(energyDistributionMAX_TextField.text);
+		window.draw(energyDistributionMIN_TextField.rectangle);
+		window.draw(energyDistributionMIN_TextField.text);
+		window.draw(energyDistribution_Button.rectangle);
+		window.draw(energyDistribution_Button.text);
+		window.draw(distributionTypeHomogenous_Button.rectangle);
+		window.draw(distributionTypeHomogenous_Button.text);
+		window.draw(distributionTypeHeterogenous_Button.rectangle);
+		window.draw(distributionTypeHeterogenous_Button.text);
+		/*
 		window.draw(saveTo_Text);
 		window.draw(save_bmp.rectangle);
 		window.draw(save_bmp.text);
@@ -2420,6 +2696,13 @@ int main()
 		window.draw(savePath_Text);
 		window.draw(saveFilename_TextField.rectangle);
 		window.draw(saveFilename_TextField.text);
+		*/
+		window.draw(nucleationType_Text);
+		window.draw(nucleationStart_Text);
+		window.draw(SRXiterations_Text);
+		window.draw(SRXiterations_TextField.rectangle);
+		window.draw(SRXiterations_TextField.text);
+		/*
 		window.draw(importFrom_Text);
 		window.draw(import_bmp.rectangle);
 		window.draw(import_bmp.text);
@@ -2428,10 +2711,10 @@ int main()
 		window.draw(importPath_Text);
 		window.draw(importFilename_TextField.rectangle);
 		window.draw(importFilename_TextField.text);
+		*/
 
 		window.display();
 	}
-
 
 	return false;
 }
