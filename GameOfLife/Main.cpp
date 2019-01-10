@@ -1334,7 +1334,7 @@ int main()
 	Vector2f mousePosition;
 	int x = 0, y = 0;
 
-	sf::RenderWindow window(sf::VideoMode(1920, 1080, 32), "Multiscale Modelling", sf::Style::Fullscreen);	//glowne okno aplikacji
+	sf::RenderWindow window(sf::VideoMode(1920, 1080, 32), "Multiscale Modelling", sf::Style::Default);	//glowne okno aplikacji
 	window.setPosition(Vector2i(0, 0));
 
 	while (window.isOpen())
@@ -2300,6 +2300,7 @@ int main()
 								}
 						}
 						window.display();
+						system("pause");
 						sleep(sf::seconds(4));
 
 

@@ -34,15 +34,15 @@ c:\users\michal\documents\visual studio 2017\projects\gameoflife — kopia\gameo
           [
               T=float
           ]
-c:\users\michal\documents\visual studio 2017\projects\gameoflife — kopia\gameoflife\main.cpp(2445): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
-          with
-          [
-              T=float
-          ]
 c:\users\michal\documents\visual studio 2017\projects\gameoflife — kopia\gameoflife\main.cpp(2446): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
           with
           [
               T=float
           ]
-c:\users\michal\documents\visual studio 2017\projects\gameoflife — kopia\gameoflife\main.cpp(2452): warning C4018: '<': signed/unsigned mismatch
+c:\users\michal\documents\visual studio 2017\projects\gameoflife — kopia\gameoflife\main.cpp(2447): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
+          with
+          [
+              T=float
+          ]
+c:\users\michal\documents\visual studio 2017\projects\gameoflife — kopia\gameoflife\main.cpp(2453): warning C4018: '<': signed/unsigned mismatch
   GameOfLife.vcxproj -> C:\Users\Michal\Documents\Visual Studio 2017\Projects\GameOfLife — kopia\Debug\GameOfLife.exe
